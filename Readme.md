@@ -301,16 +301,3 @@ npm run type-check
 npm run lint
 ```
 
-## 📝 License
-
-MIT
-
-## 🙏 Acknowledgments
-
-Inspired by [Traycer](https://traycer.ai/) - the concept of a planning layer for AI coding agents.
-
-## 📧 Support
-
-For questions or issues, please check the documentation or create an issue in the repository.
-
----
