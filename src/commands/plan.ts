@@ -28,8 +28,12 @@ export async function planCommand(
 
   // Check API key
   if (!isAPIKeyConfigured()) {
-    logger.error('ANTHROPIC_API_KEY not found');
-    logger.info('Set it with: export ANTHROPIC_API_KEY=your_key_here');
+    logger.error('No AI API key found');
+    logger.info('Set one of the following:');
+    logger.info('  - OPENAI_API_KEY (recommended)');
+    logger.info('  - ANTHROPIC_API_KEY');
+    logger.newline();
+    logger.info('Example: export OPENAI_API_KEY=your_key_here');
     process.exit(1);
   }
 

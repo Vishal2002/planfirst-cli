@@ -70,8 +70,8 @@ export async function initCommand(options: InitOptions): Promise<void> {
         '.git/**',
       ],
       ai: {
-        provider: 'anthropic',
-        model: 'claude-sonnet-4-20250514',
+        provider: process.env.OPENAI_API_KEY ? 'openai' : 'anthropic',
+        model: process.env.OPENAI_API_KEY ? 'gpt-4o' : 'claude-sonnet-4-20250514',
         maxTokens: 4096,
         temperature: 0.7,
       },

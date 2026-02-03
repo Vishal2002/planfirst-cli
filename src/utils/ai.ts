@@ -3,8 +3,30 @@ import { logger } from './logger';
 
 /**
  * AI Integration for PlanFirst CLI
- * Integrates with Anthropic's Claude API for plan generation
+ * Supports both OpenAI and Anthropic APIs
  */
+
+type AIProvider = 'openai' | 'anthropic';
+
+interface OpenAIMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
+interface OpenAIResponse {
+  id: string;
+  choices: Array<{
+    message: {
+      content: string;
+    };
+  }>;
+  usage: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+  model: string;
+}
 
 interface AnthropicMessage {
   role: 'user' | 'assistant';
@@ -24,36 +46,144 @@ interface AnthropicResponse {
 }
 
 export class AIClient {
+  private provider: AIProvider;
   private apiKey: string;
   private model: string;
   private maxTokens: number;
   private temperature: number;
-  private baseURL: string = 'https://api.anthropic.com/v1';
+  private baseURL: string;
 
   constructor(config: {
+    provider?: AIProvider;
     apiKey?: string;
     model?: string;
     maxTokens?: number;
     temperature?: number;
   }) {
-    this.apiKey = config.apiKey || process.env.ANTHROPIC_API_KEY || '';
-    this.model = config.model || 'claude-sonnet-4-20250514';
-    this.maxTokens = config.maxTokens || 4096;
-    this.temperature = config.temperature || 0.7;
+    // Determine provider - prefer OpenAI if both are available
+    const hasOpenAI = !!(config.apiKey || process.env.OPENAI_API_KEY);
+    const hasAnthropic = !!(config.apiKey || process.env.ANTHROPIC_API_KEY);
+    
+    if (config.provider) {
+      this.provider = config.provider;
+    } else if (hasOpenAI) {
+      this.provider = 'openai';
+    } else if (hasAnthropic) {
+      this.provider = 'anthropic';
+    } else {
+      throw new AIError(
+        'No API key found. Set OPENAI_API_KEY or ANTHROPIC_API_KEY environment variable.'
+      );
+    }
+
+    // Set API key based on provider
+    if (this.provider === 'openai') {
+      this.apiKey = config.apiKey || process.env.OPENAI_API_KEY || '';
+      this.model = config.model || 'gpt-4o';
+      this.baseURL = 'https://api.openai.com/v1';
+    } else {
+      this.apiKey = config.apiKey || process.env.ANTHROPIC_API_KEY || '';
+      this.model = config.model || 'claude-sonnet-4-20250514';
+      this.baseURL = 'https://api.anthropic.com/v1';
+    }
 
     if (!this.apiKey) {
       throw new AIError(
-        'Anthropic API key not found. Set ANTHROPIC_API_KEY environment variable.'
+        `${this.provider === 'openai' ? 'OpenAI' : 'Anthropic'} API key not found.`
       );
+    }
+
+    this.maxTokens = config.maxTokens || 4096;
+    this.temperature = config.temperature || 0.7;
+
+    logger.debug(`Using ${this.provider.toUpperCase()} API with model: ${this.model}`);
+  }
+
+
+  /**
+   * Generate completion from AI
+   */
+  async complete(request: AIRequest): Promise<AIResponse> {
+    logger.debug(`Sending request to ${this.provider.toUpperCase()} API...`);
+
+    if (this.provider === 'openai') {
+      return await this.completeWithOpenAI(request);
+    } else {
+      return await this.completeWithAnthropic(request);
     }
   }
 
   /**
-   * Generate completion from Claude
+   * Generate completion with OpenAI
    */
-  async complete(request: AIRequest): Promise<AIResponse> {
-    logger.debug('Sending request to Claude API...');
+  private async completeWithOpenAI(request: AIRequest): Promise<AIResponse> {
+    const messages: OpenAIMessage[] = [];
 
+    // Add system message if provided
+    if (request.systemPrompt) {
+      messages.push({
+        role: 'system',
+        content: request.systemPrompt,
+      });
+    } else {
+      messages.push({
+        role: 'system',
+        content: this.getDefaultSystemPrompt(),
+      });
+    }
+
+    // Add user message with context and prompt
+    const userContent = this.buildPrompt(request);
+    messages.push({
+      role: 'user',
+      content: userContent,
+    });
+
+    try {
+      const response = await fetch(`${this.baseURL}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: this.model,
+          messages,
+          max_tokens: request.maxTokens || this.maxTokens,
+          temperature: request.temperature || this.temperature,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new AIError(`OpenAI API request failed: ${response.status} - ${error}`);
+      }
+     //@ts-ignore
+      const data: OpenAIResponse = await response.json();
+
+      logger.debug('Received response from OpenAI API');
+
+      return {
+        content: data.choices[0]?.message?.content || '',
+        usage: {
+          promptTokens: data.usage.prompt_tokens,
+          completionTokens: data.usage.completion_tokens,
+          totalTokens: data.usage.total_tokens,
+        },
+        model: data.model,
+      };
+    } catch (error) {
+      if (error instanceof AIError) {
+        throw error;
+      }
+      throw new AIError('Failed to communicate with OpenAI API', error);
+    }
+  }
+
+  /**
+   * Generate completion with Anthropic
+   */
+  private async completeWithAnthropic(request: AIRequest): Promise<AIResponse> {
     const messages: AnthropicMessage[] = [
       {
         role: 'user',
@@ -80,12 +210,12 @@ export class AIClient {
 
       if (!response.ok) {
         const error = await response.text();
-        throw new AIError(`API request failed: ${response.status} - ${error}`);
+        throw new AIError(`Anthropic API request failed: ${response.status} - ${error}`);
       }
-      //@ts-ignore
+     //@ts-ignore
       const data: AnthropicResponse = await response.json();
 
-      logger.debug('Received response from Claude API');
+      logger.debug('Received response from Anthropic API');
 
       return {
         content: data.content[0]?.text || '',
@@ -100,7 +230,7 @@ export class AIClient {
       if (error instanceof AIError) {
         throw error;
       }
-      throw new AIError('Failed to communicate with Claude API', error);
+      throw new AIError('Failed to communicate with Anthropic API', error);
     }
   }
 
@@ -271,6 +401,7 @@ Provide a structured analysis in Markdown format.`;
  * Create AI client instance
  */
 export function createAIClient(config?: {
+  provider?: 'openai' | 'anthropic';
   apiKey?: string;
   model?: string;
   maxTokens?: number;
@@ -280,8 +411,17 @@ export function createAIClient(config?: {
 }
 
 /**
- * Helper to check if API key is configured
+ * Check if any API key is configured
  */
 export function isAPIKeyConfigured(): boolean {
-  return !!(process.env.ANTHROPIC_API_KEY);
+  return !!(process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY);
+}
+
+/**
+ * Get which provider is available
+ */
+export function getAvailableProvider(): 'openai' | 'anthropic' | null {
+  if (process.env.OPENAI_API_KEY) return 'openai';
+  if (process.env.ANTHROPIC_API_KEY) return 'anthropic';
+  return null;
 }
