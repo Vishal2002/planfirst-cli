@@ -311,22 +311,51 @@ program.on('--help', () => {
 });
 
 // Error handling
-program.exitOverride();
-
-process.on('uncaughtException', (error) => {
-  logger.error('Uncaught exception', error);
-  process.exit(1);
-});
-
-process.on('unhandledRejection', (error) => {
-  logger.error('Unhandled rejection', error);
-  process.exit(1);
-});
-
-// Parse arguments
 if (process.argv.length === 2) {
-  console.log(banner);
-  program.help({ error: true });
-} else {
-  program.parse(process.argv);
-}
+    console.log(banner);
+    program.help();
+  } else {
+    try {
+      program.parse(process.argv);
+    } catch (err: any) {
+      // Handle Commander-specific errors gracefully
+      if (err && err.name === 'CommanderError') {
+        // Unknown command → clean message, no stack trace
+        if (err.code === 'commander.unknownCommand') {
+          const badCommand = process.argv[2] || '<empty>';
+          console.error(chalk.red(`\nUnknown command: ${chalk.bold(badCommand)}`));
+          console.error(chalk.yellow('Run ') + chalk.white('planfirst --help') + chalk.yellow(' to see available commands.\n'));
+          process.exit(1);
+        }
+  
+        // Missing argument / required option → show help + error
+        if (
+          err.code === 'commander.missingArgument' ||
+          err.code === 'commander.missingRequiredOption' ||
+          err.code === 'commander.missingRequiredArgument'
+        ) {
+          program.outputHelp({ error: true });
+          console.error(chalk.red(`\nError: ${err.message}\n`));
+          process.exit(1);
+        }
+  
+        // Other Commander errors → re-throw so we see them during dev
+        throw err;
+      }
+  
+      // Any other unexpected error
+      logger.error('Unexpected CLI error', err);
+      process.exit(1);
+    }
+  }
+  
+  // Global last-resort handlers (rarely reached now)
+  process.on('uncaughtException', (error) => {
+    logger.error('Uncaught exception (last resort)', error);
+    process.exit(1);
+  });
+  
+  process.on('unhandledRejection', (reason) => {
+    logger.error('Unhandled promise rejection (last resort)', reason);
+    process.exit(1);
+  });
