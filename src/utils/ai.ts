@@ -1,5 +1,7 @@
 import { AIRequest, AIResponse, AIError } from '../types';
 import { logger } from './logger';
+import dotenv from 'dotenv';
+dotenv.config();
 
 /**
  * AI Integration for PlanFirst CLI

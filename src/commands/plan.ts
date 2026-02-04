@@ -6,6 +6,7 @@ import { exists, readJSON, writeFile, writeJSON, ensureDir } from '../utils/file
 import { CodebaseAnalyzer } from '../core/analyzer';
 import { createAIClient, isAPIKeyConfigured } from '../utils/ai';
 import { Planner } from '../core/planner';
+import chalk from 'chalk';
 
 /**
  * Generate an implementation plan
@@ -50,6 +51,7 @@ export async function planCommand(
     const analysis = await analyzer.analyze();
     
     spinner.succeed('Codebase analyzed');
+    spinner.stop();
     logger.newline();
     
     // Display project info
@@ -72,6 +74,7 @@ export async function planCommand(
     const planMarkdown = await aiClient.generatePlan(description, context);
     
     spinner.succeed('Plan generated');
+    spinner.stop();
     logger.newline();
 
     // Parse plan into structured format
@@ -87,10 +90,13 @@ export async function planCommand(
     await writeFile(planMarkdownPath, planMarkdown);
     
     spinner.succeed('Plan saved');
+    spinner.stop();
     logger.newline();
 
     // Display summary
-    logger.success('Plan generated successfully! 🎉');
+    console.log(chalk.green('╔═══════════════════════════════════════════════════════════╗'));
+    console.log(chalk.green('║') + chalk.bold.white('        ✨  Plan Generated Successfully!  ✨            ') + chalk.green('║'));
+    console.log(chalk.green('╚═══════════════════════════════════════════════════════════╝'));
     logger.newline();
 
     logger.subsection('Plan Summary');

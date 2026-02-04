@@ -1,0 +1,22 @@
+# Source
+src/
+tsconfig.json
+
+# Tests
+*.test.ts
+__tests__/
+
+
+
+# Development
+.vscode/
+.idea/
+*.log
+
+# Plans and config (user generated)
+plans/
+.planfirst/
+
+# Git
+.git/
+.gitignore

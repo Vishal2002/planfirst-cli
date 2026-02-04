@@ -2,6 +2,7 @@ import path from 'path';
 import { ExportOptions, Plan } from '../types';
 import { logger } from '../utils/logger';
 import { exists, readJSON, readFile, writeFile } from '../utils/fileSystem';
+import chalk from 'chalk';
 
 /**
  * Export a plan for coding agents
@@ -85,7 +86,10 @@ export async function exportCommand(
     // Write export
     await writeFile(outputPath, exportContent);
 
-    logger.success('Plan exported successfully! 📄');
+    logger.newline();
+    console.log(chalk.cyan('╔═══════════════════════════════════════════════════════════╗'));
+    console.log(chalk.cyan('║') + chalk.bold.white('         📄  Plan Exported Successfully!  📄            ') + chalk.cyan('║'));
+    console.log(chalk.cyan('╚═══════════════════════════════════════════════════════════╝'));
     logger.newline();
 
     logger.subsection('Export Details');

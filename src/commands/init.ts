@@ -10,11 +10,30 @@ import {
   scanDirectory 
 } from '../utils/fileSystem';
 import { PlanFirstConfig, InitOptions } from '../types';
+import chalk from 'chalk';
+
 
 /**
  * Initialize PlanFirst in the current project
  */
+
+// Guard against double execution
+let initRunning = false;
+
 export async function initCommand(options: InitOptions): Promise<void> {
+  if (initRunning) {
+    return; // Already running, skip
+  }
+  initRunning = true;
+
+  try {
+    await runInit(options);
+  } finally {
+    initRunning = false;
+  }
+}
+
+async function runInit(options: InitOptions): Promise<void> {
   const rootPath = process.cwd();
   const configDir = path.join(rootPath, '.planfirst');
   const configPath = path.join(configDir, 'config.json');
@@ -105,10 +124,13 @@ export async function initCommand(options: InitOptions): Promise<void> {
     }
 
     spinner.succeed('Project initialized successfully!');
+    spinner.stop();
 
     // Display summary
     logger.newline();
-    logger.success('PlanFirst is ready to use! 🚀');
+    console.log(chalk.green('╔═══════════════════════════════════════════════════════════╗'));
+    console.log(chalk.green('║') + chalk.bold.white('           🎉  PlanFirst is Ready to Use!  🎉           ') + chalk.green('║'));
+    console.log(chalk.green('╚═══════════════════════════════════════════════════════════╝'));
     logger.newline();
 
     logger.subsection('Project Information');
@@ -131,7 +153,9 @@ export async function initCommand(options: InitOptions): Promise<void> {
     logger.newline();
 
     logger.subsection('Next Steps');
-    logger.item('Set your Anthropic API key:', 1);
+    logger.item('Set your AI API key (choose one):', 1);
+    logger.log(`     ${logger.dim('export OPENAI_API_KEY=your_key_here')}`);
+    logger.log(`     ${logger.dim('or')}`);
     logger.log(`     ${logger.dim('export ANTHROPIC_API_KEY=your_key_here')}`);
     logger.item('Generate your first plan:', 1);
     logger.log(`     ${logger.dim('planfirst plan "Add user authentication"')}`);
