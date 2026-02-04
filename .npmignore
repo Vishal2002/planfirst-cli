@@ -17,6 +17,8 @@ __tests__/
 plans/
 .planfirst/
 
+.env
+
 # Git
 .git/
 .gitignore
