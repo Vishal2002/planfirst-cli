@@ -1,5 +1,20 @@
 # PlanFirst CLI
 
+```
+╔══════════════════════════════════════════════════════════╗
+║                                                          ║
+║   ██████╗ ██╗      █████╗ ███╗   ██╗███████╗██╗██████╗ ███████╗████████╗   ║
+║   ██╔══██╗██║     ██╔══██╗████╗  ██║██╔════╝██║██╔══██╗██╔════╝╚══██╔══╝   ║
+║   ██████╔╝██║     ███████║██╔██╗ ██║█████╗  ██║██████╔╝███████╗   ██║      ║
+║   ██╔═══╝ ██║     ██╔══██║██║╚██╗██║██╔══╝  ██║██╔══██╗╚════██║   ██║      ║
+║   ██║     ███████╗██║  ██║██║ ╚████║██║     ██║██║  ██║███████║   ██║      ║
+║   ╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝      ║
+║                                                          ║
+║              Planning Layer for AI Coding Agents         ║
+║                                                          ║
+╚══════════════════════════════════════════════════════════╝
+```
+
 > A planning layer for AI coding agents - turns your intent into detailed, verifiable implementation plans.
 
 ## 🎯 What is PlanFirst?
@@ -7,76 +22,72 @@
 PlanFirst is inspired by [Traycer](https://www.traycer.ai/) - it acts as an intelligent planning layer that sits between your idea and AI coding agents (like Cursor, Claude Code, GitHub Copilot). Instead of letting AI agents jump straight to code, PlanFirst:
 
 1. **Analyzes** your codebase structure
-2. **Generates** detailed, phase-based implementation plans
+2. **Generates** detailed, phase-based implementation plans with AI
 3. **Exports** plans for any coding agent to execute
 4. **Verifies** implementations match the plan
 
 ## 🚀 Key Features
 
-- **📊 Codebase Analysis**: Automatically understands your project structure, language, and framework
-- **🤖 AI-Powered Planning**: Uses Claude to generate detailed implementation plans
-- **📝 Phase-Based Approach**: Breaks complex tasks into manageable phases
-- **✅ Verification**: Compares implementations against plans to catch gaps and regressions
-- **🔄 Agent Agnostic**: Works with any coding agent (Cursor, Claude Code, etc.)
-- **📦 Export Formats**: Markdown, JSON, and agent-specific formats
+- 📊 **Codebase Analysis**: Automatically understands your project structure, language, and framework
+- 🤖 **AI-Powered Planning**: Uses OpenAI or Anthropic to generate detailed implementation plans
+- 📝 **Phase-Based Approach**: Breaks complex tasks into manageable phases
+- ✅ **Verification**: Compares implementations against plans to catch gaps and regressions
+- 🔄 **Agent Agnostic**: Works with any coding agent (Cursor, Claude Code, etc.)
+- 📦 **Export Formats**: Markdown, JSON, and agent-specific formats
 
 ## 📋 Prerequisites
 
-- Node.js 18+ 
+- Node.js 18 or higher
 - npm, yarn, or pnpm
-- Anthropic API key (for AI-powered plan generation)
+- **AI API key** (choose one):
+  - **OpenAI API key** (recommended) - [Get one here](https://platform.openai.com/api-keys)
+  - **Anthropic API key** - [Get one here](https://console.anthropic.com)
 
 ## 🛠️ Installation
 
-### Local Development Setup
+### Global Installation (Recommended)
 
 ```bash
-# Clone or create project directory
-mkdir planfirst-cli && cd planfirst-cli
-
-# Initialize project
-npm init -y
-
-# Install dependencies
-npm install commander chalk ora dotenv fs-extra glob ignore
-
-# Install dev dependencies
-npm install -D typescript @types/node @types/fs-extra ts-node nodemon @types/glob
-
-# Create project structure
-mkdir -p src/{commands,core,utils,types,templates} plans .planfirst
-
-# Build the project
-npm run build
+npm install -g planfirst-cli
 ```
 
-### Get Your Anthropic API Key
-
-1. Sign up at [https://console.anthropic.com](https://console.anthropic.com)
-2. Create an API key
-3. Set it as an environment variable:
+### Local Installation
 
 ```bash
-export ANTHROPIC_API_KEY=your_api_key_here
+npm install planfirst-cli
 ```
 
-Or add to `.env` file:
-```
-ANTHROPIC_API_KEY=your_api_key_here
+## 🔑 Setup
+
+### Set Your API Key
+
+**Option 1: OpenAI (Recommended - Easier to Get)**
+
+```bash
+export OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-## 📚 Usage
+**Option 2: Anthropic Claude**
+
+```bash
+export ANTHROPIC_API_KEY=your_anthropic_api_key_here
+```
+
+**Option 3: Use .env File**
+
+```bash
+# In your project directory
+echo "OPENAI_API_KEY=your_api_key_here" > .env
+```
+
+> **Note**: PlanFirst automatically detects which API key you've set and uses it. If both are set, it prefers OpenAI.
+
+## 📚 Quick Start
 
 ### 1. Initialize PlanFirst
 
 ```bash
-# Navigate to your project
 cd your-project
-
-# Initialize PlanFirst
-npm run dev -- init
-
-# Or if installed globally
 planfirst init
 ```
 
@@ -89,65 +100,46 @@ This will:
 ### 2. Generate a Plan
 
 ```bash
-# Generate a plan from description
-npm run dev -- plan "Add user authentication with JWT"
-
-# Interactive mode with clarifying questions
-npm run dev -- plan --interactive
-
-# Specify output format
-npm run dev -- plan "Add REST API for users" --format json
+planfirst plan "Add user authentication with JWT"
 ```
 
 Example output:
 ```
-━━━ Generating Plan ━━━
+━━━ Generating Implementation Plan ━━━
 
-✓ Analyzing codebase...
-✓ Generating implementation plan...
-✓ Breaking down into phases...
-✓ Plan saved: plans/plan-1738483200000.md
+✔ Codebase analyzed
+✔ Plan generated
+✔ Plan saved
 
-Plan ID: plan-1738483200000
-Phases: 3
-Files affected: 5
-Estimated complexity: medium
+╔═══════════════════════════════════════════════════════════╗
+║        ✨  Plan Generated Successfully!  ✨            ║
+╚═══════════════════════════════════════════════════════════╝
+
+Plan Summary:
+  Plan ID: plan-1738483200000
+  Phases: 3
+  Files Affected: 5
+  Complexity: medium
 ```
 
-### 3. View Generated Plan
-
-```bash
-# Show plan details
-npm run dev -- show plan-1738483200000
-
-# List all plans
-npm run dev -- list
-```
-
-### 4. Export for Coding Agent
+### 3. Export for Your Coding Agent
 
 ```bash
 # Export as markdown
-npm run dev -- export plan-1738483200000 --format markdown
+planfirst export plan-1738483200000 --format markdown
+
+# Export for Cursor (with checklist)
+planfirst export plan-1738483200000 --format cursor
 
 # Export specific phase
-npm run dev -- export plan-1738483200000 --phase 1
-
-# Export for Cursor
-npm run dev -- export plan-1738483200000 --format cursor -o implementation.md
+planfirst export plan-1738483200000 --phase 1
 ```
 
-### 5. Verify Implementation
+### 4. Verify Implementation
 
 ```bash
-# After implementing the plan with your coding agent
-npm run dev -- verify plan-1738483200000
-
-# Verify specific phase
-npm run dev -- verify plan-1738483200000 --phase 1
-
-# Generate verification report
-npm run dev -- verify plan-1738483200000 --report verification-report.md
+# After implementing with your coding agent
+planfirst verify plan-1738483200000
 ```
 
 ## 📖 Example Workflow
@@ -161,7 +153,7 @@ planfirst init
 # 2. Generate plan
 planfirst plan "Add user profile page with edit functionality"
 
-# Output:
+# Output shows:
 # Plan ID: plan-001
 # Phases: 3
 #   Phase 1: Create profile route and component
@@ -177,49 +169,79 @@ planfirst export plan-001 --phase 1 -o phase1.md
 # 5. Verify phase 1
 planfirst verify plan-001 --phase 1
 
-# Output:
-# ✓ UserProfile component created
-# ✓ Route added to router
+# Output shows:
+# ✔ UserProfile component created
+# ✔ Route added to router
 # ⚠ Missing prop types definition
 # ℹ 2/3 tasks completed
 
 # 6. Continue with next phases...
 ```
 
-## 🏗️ Project Structure
+## 🎨 CLI Commands
 
+### `planfirst init`
+Initialize PlanFirst in your project
+
+**Options:**
+- `-n, --name <name>` - Project name
+- `--skip-analysis` - Skip initial codebase analysis
+
+### `planfirst plan <description>`
+Generate implementation plan
+
+**Options:**
+- `-i, --interactive` - Interactive mode with clarifying questions
+- `-o, --output <path>` - Output file path
+- `-f, --format <format>` - Output format (markdown, json)
+
+**Examples:**
+```bash
+planfirst plan "Add REST API for users"
+planfirst plan --interactive
+planfirst plan "Add search feature" --format json
 ```
-planfirst-cli/
-├── src/
-│   ├── index.ts              # CLI entry point
-│   ├── commands/
-│   │   ├── init.ts           # Initialize command
-│   │   ├── plan.ts           # Generate plan
-│   │   ├── verify.ts         # Verify implementation
-│   │   └── export.ts         # Export plan
-│   ├── core/
-│   │   ├── analyzer.ts       # Codebase analysis
-│   │   ├── planner.ts        # Plan generation
-│   │   ├── verifier.ts       # Verification logic
-│   │   └── phaser.ts         # Phase management
-│   ├── utils/
-│   │   ├── fileSystem.ts     # File operations
-│   │   ├── parser.ts         # Code parsing
-│   │   ├── logger.ts         # Logging
-│   │   └── ai.ts             # AI integration
-│   ├── types/
-│   │   └── index.ts          # TypeScript types
-│   └── templates/
-│       └── plan-template.md  # Plan template
-├── plans/                     # Generated plans
-├── .planfirst/               # Config and cache
-│   ├── config.json
-│   └── metadata.json
-├── dist/                      # Compiled output
-├── package.json
-├── tsconfig.json
-└── README.md
+
+### `planfirst verify <plan-id>`
+Verify implementation against plan
+
+**Options:**
+- `-p, --phase <number>` - Verify specific phase only
+- `-t, --task <id>` - Verify specific task only
+- `-r, --report <path>` - Save verification report to file
+
+**Examples:**
+```bash
+planfirst verify plan-001
+planfirst verify plan-001 --phase 1
+planfirst verify plan-001 --report report.md
 ```
+
+### `planfirst export <plan-id>`
+Export plan for coding agents
+
+**Options:**
+- `-f, --format <format>` - Export format (markdown, json, cursor)
+- `-o, --output <path>` - Output file path
+- `-p, --phase <number>` - Export specific phase only
+
+**Examples:**
+```bash
+planfirst export plan-001 --format cursor
+planfirst export plan-001 --phase 1 -o phase1.md
+```
+
+### `planfirst list`
+List all plans
+
+**Options:**
+- `-s, --status <status>` - Filter by status (draft, ready, in-progress, completed)
+
+### `planfirst show <plan-id>`
+Show plan details
+
+**Options:**
+- `-p, --phase <number>` - Show specific phase only
 
 ## ⚙️ Configuration
 
@@ -236,68 +258,76 @@ Edit `.planfirst/config.json` to customize behavior:
     ".git/**"
   ],
   "ai": {
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-20250514",
+    "provider": "openai",
+    "model": "gpt-4o",
     "maxTokens": 4096,
     "temperature": 0.7
   },
   "verification": {
     "strictMode": false,
-    "ignoreWarnings": false,
-    "autoFix": false
+    "ignoreWarnings": false
   }
 }
 ```
 
-## 🎨 CLI Commands
+### Supported AI Providers
 
-### `planfirst init`
-Initialize PlanFirst in your project
-- Creates configuration
-- Analyzes project structure
-- Sets up directories
+**OpenAI:**
+- Models: `gpt-4o`, `gpt-4-turbo`, `gpt-3.5-turbo`
+- Set: `OPENAI_API_KEY`
 
-### `planfirst plan <description>`
-Generate implementation plan
-- `-i, --interactive` - Interactive mode
-- `-o, --output <path>` - Output file path
-- `-f, --format <format>` - Output format (markdown, json)
+**Anthropic:**
+- Models: `claude-sonnet-4-20250514`, `claude-opus-4-20250514`
+- Set: `ANTHROPIC_API_KEY`
 
-### `planfirst verify <plan-id>`
-Verify implementation
-- `-p, --phase <number>` - Verify specific phase
-- `-t, --task <id>` - Verify specific task
-- `--fix` - Auto-fix issues
-- `-r, --report <path>` - Save report
+## 🗂️ Project Structure
 
-### `planfirst export <plan-id>`
-Export plan for agents
-- `-f, --format <format>` - Export format
-- `-o, --output <path>` - Output file
-- `-p, --phase <number>` - Export specific phase
-
-### `planfirst list`
-List all plans
-
-### `planfirst show <plan-id>`
-Show plan details
+```
+your-project/
+├── .planfirst/
+│   ├── config.json       # Configuration
+│   └── metadata.json     # Project metadata
+├── plans/
+│   ├── plan-001.json     # Plan data
+│   └── plan-001.md       # Plan markdown
+└── ... your project files
+```
 
 ## 🧪 Development
 
 ```bash
-# Start development server with auto-reload
-npm run dev
+# Clone the repository
+git clone https://github.com/yourusername/planfirst-cli.git
+cd planfirst-cli
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev -- init
 
 # Build for production
 npm run build
 
 # Run compiled version
 npm start
-
-# Type checking
-npm run type-check
-
-# Linting (if configured)
-npm run lint
 ```
 
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+MIT License - see LICENSE file for details
+
+## 🙏 Acknowledgments
+
+- Inspired by [Traycer](https://www.traycer.ai/)
+- Powered by OpenAI and Anthropic AI
+
+---
+
+**Made with ❤️ by Vishal Sharma**
+
+*Build smarter with AI planning!* 🚀
