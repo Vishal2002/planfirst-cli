@@ -1,6 +1,6 @@
 {
   "name": "planfirst-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A planning layer CLI for AI coding agents",
   "main": "index.js",
   "scripts": {
